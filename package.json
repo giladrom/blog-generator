@@ -1,0 +1,25 @@
+{
+  "name": "blog-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@shopify/shopify-api": "^5.2.0",
+    "cheerio": "^1.0.0-rc.12",
+    "domhandler": "^5.0.3",
+    "dotenv": "^16.0.3",
+    "htmlparser2": "^8.0.1",
+    "jsdom": "^20.0.2",
+    "node-html-parser": "^6.1.1",
+    "openai": "^3.0.1",
+    "random": "^3.0.6",
+    "unsplash-js": "^7.0.15",
+    "uuid": "^9.0.0"
+  },
+  "type": "module"
+}
