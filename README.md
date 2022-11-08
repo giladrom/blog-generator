@@ -18,6 +18,7 @@ SHOP_API_KEY=<Shopify store API Key>
 UNSPLASH_API_KEY=<Unsplash API Key>
 GOOGLE_SEARCH_API_KEY=<Custom search engine API Key>
 GOOGLE_SEARCH_ENGINE_ID=<Custom Search engine ID>
+BLOG_AUTHOR=<Your name>
 ```
 
 ### Running

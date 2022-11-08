@@ -11,6 +11,7 @@ import { dogBreeds } from "./breeds.js";
 // TODO: Train AI with previous blog posts
 // TODO: Get consistent HTML out of OpenAI
 // TODO: Find affordable keyword database for post optimization
+// TODO: Use multiple GPT3 queries for longer posts
 
 //* Initialize throttling so we don't hit the Google API limit
 //* 1 query every 2 seconds
@@ -62,7 +63,7 @@ function post_article(title, html, photos) {
       article: {
         blog_id: blog_id,
         title: title,
-        author: "Gilad Rom",
+        author: process.env.BLOG_AUTHOR,
         tags: "dogs, puppies, advice, health, tips, care",
         body_html: $.html(),
         published: false,
@@ -105,7 +106,7 @@ function generate_article(prompt) {
       .createCompletion({
         model: "text-davinci-002",
         prompt: prompt,
-        temperature: 0.3,
+        temperature: 0.1,
         max_tokens: 4000 - prompt.length,
         n: 1,
       })
@@ -154,9 +155,6 @@ function get_photos_from_google(subject) {
       .then(async (res) => {
         var body = await res.json();
 
-        console.log(google_url);
-
-        console.log(body);
         const urls = body.items.map((item) => {
           return item.link;
         });
@@ -178,7 +176,11 @@ function img(photos, index) {
   // return img_tag + attr;
 
   //* Google
-  const img_tag = `<img src="${photos[index + 1]}">`;
+  const img_tag = `<div>
+  <img src="${
+    photos[index + 1]
+  }" style="display: block; margin-left: auto; margin-right: auto;">
+  </div>`;
   return img_tag;
 }
 
@@ -190,15 +192,20 @@ function add_photos_to_html(html, photos) {
   var elem = true;
 
   if ($("h2").length > 1) {
-    $("h2").each((i, elem) => {
-      var img_tag = img(photos, i);
-      $(elem).before(img_tag);
-    });
+    $("h2").last().prev().prev().before(img(photos, 1));
+    $("h2").last().before(img(photos, 2));
+
+    // $("h2").each((i, elem) => {
+    //   var img_tag = img(photos, i);
+    //   $(elem).before(img_tag);
+    // });
   } else {
-    $("p").each((i, elem) => {
-      var img_tag = img(photos, i);
-      $(elem).before(img_tag);
-    });
+    $("p").last().prev().prev().before(img(photos, 1));
+    $("p").last().before(img(photos, 2));
+    // $("p").each((i, elem) => {
+    //   var img_tag = img(photos, i);
+    //   $(elem).before(img_tag);
+    // });
   }
 
   return $.html();
@@ -207,8 +214,7 @@ function add_photos_to_html(html, photos) {
 //* Execute all queries inside a throttle function
 
 const throttled = throttle(async (breed) => {
-  const prompt = `Write a long form blog post in the style of Taylor Lorenz about how to care for a ${breed} puppy and their breed specific needs, health issues and diet. Output as html: <html>
-`;
+  const prompt = `Write a very long blog post in the style of Taylor Lorenz about how to care for a ${breed} puppy and their breed specific needs, health issues and diet. Must respond with syntactically correct HTML. Be creative but the HTML must be correct. `;
 
   console.log(`Getting photos for ${breed}...`);
 
@@ -218,18 +224,12 @@ const throttled = throttle(async (breed) => {
 
   generate_article(prompt)
     .then((article) => {
-      // console.log("*** OPENAI OUTPUT ***");
-      // console.log(article[0].text);
-      // console.log("*** OPENAI OUTPUT ***");
-
       console.log("Adding photos...");
       const html = add_photos_to_html(article[0].text, photos);
-      // console.log("*** WITH IMAGES ***");
-      // console.log(html);
-      // console.log("*** WITH IMAGES ***");
 
       console.log("Posting article");
       const title = `What you should know before adopting a ${breed} puppy`;
+
       post_article(title, html, photos)
         .then((res) => {
           console.log(res);
@@ -243,8 +243,8 @@ const throttled = throttle(async (breed) => {
     });
 });
 
-dogBreeds.forEach(async (breed) => {
+dogBreeds.slice(0, 5).forEach(async (breed) => {
   (async () => {
-    console.log(await throttled(breed));
+    await throttled(breed);
   })();
 });
