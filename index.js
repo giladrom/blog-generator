@@ -3,11 +3,21 @@ import Dotenv from "dotenv";
 import { createApi } from "unsplash-js";
 import * as cheerio from "cheerio";
 import random from "random";
+import pThrottle from "p-throttle";
+
+// Local imports
 import { dogBreeds } from "./breeds.js";
 
 // TODO: Train AI with previous blog posts
 // TODO: Get consistent HTML out of OpenAI
 // TODO: Find affordable keyword database for post optimization
+
+//* Initialize throttling so we don't hit the Google API limit
+//* 1 query every 2 seconds
+const throttle = pThrottle({
+  limit: 1,
+  interval: 2000,
+});
 
 //* Read .env parameters into process.env
 Dotenv.config();
@@ -194,9 +204,11 @@ function add_photos_to_html(html, photos) {
   return $.html();
 }
 
-dogBreeds.forEach(async (breed) => {
+//* Execute all queries inside a throttle function
+
+const throttled = throttle(async (breed) => {
   const prompt = `Write a long form blog post in the style of Taylor Lorenz about how to care for a ${breed} puppy and their breed specific needs, health issues and diet. Output as html: <html>
-  `;
+`;
 
   console.log(`Getting photos for ${breed}...`);
 
@@ -229,4 +241,10 @@ dogBreeds.forEach(async (breed) => {
     .catch((error) => {
       console.error(error);
     });
+});
+
+dogBreeds.forEach(async (breed) => {
+  (async () => {
+    console.log(await throttled(breed));
+  })();
 });
