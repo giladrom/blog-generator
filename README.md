@@ -11,9 +11,17 @@
 
 Create a .env file with the following:
 
+```
 OPENAI_API_KEY=<OpenAI API Key>
 SHOP=<Shopify store URL>
 SHOP_API_KEY=<Shopify store API Key>
 UNSPLASH_API_KEY=<Unsplash API Key>
 GOOGLE_SEARCH_API_KEY=<Custom search engine API Key>
 GOOGLE_SEARCH_ENGINE_ID=<Custom Search engine ID>
+```
+
+### Running
+
+```
+node index.js
+```
